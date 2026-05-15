@@ -56,7 +56,40 @@ The store wants to keep customer addresses. Propose two architectures for the CU
 **HINT:** search type 1 vs type 2 slowly changing dimensions. 
 
 ```
-Your answer...
+The store wants to keep customer addresses and we have two different formats for it. One to only store the last addresses added, and other to keep the full history of customer addresses. Below are two proposed architectures for the CUSTOMER_ADDRESS table:
+
+**Type 1 - Overwrite:**
+The architecture bellow overwrites the existing address when a customer moves. Only the current address is stored, and no history is retained here, only with the updated_at column telling when the address was inserted.
+
+| column | description |
+|---|---|
+| address_id (PK) | unique identifier |
+| customer_id (FK) | links to customer |
+| street | current street |
+| city | current city |
+| state | current state |
+| zip_code | current zip |
+| country | current country |
+| updated_at | last update timestamp |
+
+**Type 2 - Retain changes:**
+This one will keep a full history of all addresses. When a customer moves, the old row is closed and a new one is inserted with a flag telling that is the current address, which follows the valid_to, that tells when the address was replaced.
+
+| column | description |
+|---|---|
+| address_id (PK) | unique identifier |
+| customer_id (FK) | links to customer |
+| street | address street |
+| city | address city |
+| state | address state |
+| zip_code | address zip |
+| country | address country |
+| valid_from | date this address became active |
+| valid_to | date this address was replaced (NULL if current) |
+| is_current | boolean flag for the active address |
+
+The **overwrite** architecture is **Type 1** — simpler, but loses history.
+The **retain changes** architecture is **Type 2** — preserves the full timeline at the cost of more complex queries.
 ```
 
 ***
